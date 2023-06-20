@@ -6,7 +6,7 @@ name: Build and deploy Powershell project to Azure Function App - sataetagadsf
 on:
   push:
     branches:
-      - deploy
+      - disable_deploy
   workflow_dispatch:
 
 #env:
