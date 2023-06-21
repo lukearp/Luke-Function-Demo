@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.17.1.54307",
-      "templateHash": "11003976351661242625"
+      "templateHash": "12973002477606557312"
     }
   },
   "parameters": {
@@ -30,18 +30,6 @@
     "stroageAccountName": {
       "type": "string"
     },
-    "managedInstanceName": {
-      "type": "string"
-    },
-    "managedInstanceResourceGroup": {
-      "type": "string"
-    },
-    "sqlUserName": {
-      "type": "string"
-    },
-    "sqlPassword": {
-      "type": "securestring"
-    },
     "azureEnvironment": {
       "type": "string",
       "defaultValue": "AzureCloud",
@@ -65,7 +53,13 @@
   },
   "variables": {
     "suffix": "[if(equals(parameters('azureEnvironment'), 'AzureCloud'), 'core.windows.net', 'core.usgovcloudapi.net')]",
-    "sku": "[if(equals(parameters('sqlMiPublicEndpoint'), true()), createObject('name', 'Y1', 'tier', 'Dynamic', 'size', 'Y1', 'family', 'Y', 'capacity', 0), createObject('name', 'B1', 'tier', 'Basic', 'size', 'B1', 'family', 'B', 'capacity', 1))]"
+    "sku": {
+      "name": "B1",
+      "tier": "Basic",
+      "size": "B1",
+      "family": "B",
+      "capacity": 1
+    }
   },
   "resources": [
     {
@@ -111,7 +105,7 @@
         "type": "SystemAssigned"
       },
       "tags": "[parameters('tags')]",
-      "properties": "[if(equals(parameters('sqlMiPublicEndpoint'), true()), createObject('enabled', true(), 'serverFarmId', resourceId('Microsoft.Web/serverfarms', format('{0}-Plan', parameters('functionName'))), 'siteConfig', createObject('appSettings', createArray(createObject('name', 'FUNCTIONS_EXTENSION_VERSION', 'value', '~4'), createObject('name', 'FUNCTIONS_WORKER_RUNTIME', 'value', 'powershell'), createObject('name', 'AzureWebJobsStorage', 'value', format('DefaultEndpointsProtocol=https;AccountName={0};AccountKey={1};EndpointSuffix={2}', parameters('stroageAccountName'), listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('stroageAccountName')), '2022-09-01').keys[0].value, variables('suffix'))), createObject('name', 'RESOURCE_GROUP', 'value', parameters('managedInstanceResourceGroup')), createObject('name', 'MANAGED_INSTANCE_NAME', 'value', parameters('managedInstanceName')), createObject('name', 'SQL_USER_NAME', 'value', parameters('sqlUserName')), createObject('name', 'SQL_USER_PASSWORD', 'value', parameters('sqlPassword'))))), createObject('enabled', true(), 'serverFarmId', resourceId('Microsoft.Web/serverfarms', format('{0}-Plan', parameters('functionName'))), 'siteConfig', createObject('appSettings', createArray(createObject('name', 'FUNCTIONS_EXTENSION_VERSION', 'value', '~4'), createObject('name', 'FUNCTIONS_WORKER_RUNTIME', 'value', 'powershell'), createObject('name', 'AzureWebJobsStorage', 'value', format('DefaultEndpointsProtocol=https;AccountName={0};AccountKey={1};EndpointSuffix={2}', parameters('stroageAccountName'), listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('stroageAccountName')), '2022-09-01').keys[0].value, variables('suffix'))), createObject('name', 'RESOURCE_GROUP', 'value', parameters('managedInstanceResourceGroup')), createObject('name', 'MANAGED_INSTANCE_NAME', 'value', parameters('managedInstanceName')), createObject('name', 'SQL_USER_NAME', 'value', parameters('sqlUserName')), createObject('name', 'SQL_USER_PASSWORD', 'value', parameters('sqlPassword')))), 'virtualNetworkSubnetId', parameters('subnetIdForVNETIntegration'), 'vnetRouteAllEnabled', parameters('vnetRouteAll')))]",
+      "properties": "[if(equals(parameters('sqlMiPublicEndpoint'), true()), createObject('enabled', true(), 'serverFarmId', resourceId('Microsoft.Web/serverfarms', format('{0}-Plan', parameters('functionName'))), 'siteConfig', createObject('appSettings', createArray(createObject('name', 'FUNCTIONS_EXTENSION_VERSION', 'value', '~4'), createObject('name', 'FUNCTIONS_WORKER_RUNTIME', 'value', 'powershell'), createObject('name', 'AzureWebJobsStorage', 'value', format('DefaultEndpointsProtocol=https;AccountName={0};AccountKey={1};EndpointSuffix={2}', parameters('stroageAccountName'), listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('stroageAccountName')), '2022-09-01').keys[0].value, variables('suffix')))))), createObject('enabled', true(), 'serverFarmId', resourceId('Microsoft.Web/serverfarms', format('{0}-Plan', parameters('functionName'))), 'siteConfig', createObject('appSettings', createArray(createObject('name', 'FUNCTIONS_EXTENSION_VERSION', 'value', '~4'), createObject('name', 'FUNCTIONS_WORKER_RUNTIME', 'value', 'powershell'), createObject('name', 'AzureWebJobsStorage', 'value', format('DefaultEndpointsProtocol=https;AccountName={0};AccountKey={1};EndpointSuffix={2}', parameters('stroageAccountName'), listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('stroageAccountName')), '2022-09-01').keys[0].value, variables('suffix'))))), 'virtualNetworkSubnetId', parameters('subnetIdForVNETIntegration'), 'vnetRouteAllEnabled', parameters('vnetRouteAll')))]",
       "dependsOn": [
         "[resourceId('Microsoft.Web/serverfarms', format('{0}-Plan', parameters('functionName')))]",
         "[resourceId('Microsoft.Storage/storageAccounts', parameters('stroageAccountName'))]",
