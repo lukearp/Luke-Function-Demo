@@ -1,0 +1,1 @@
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://raw.githubusercontent.com/lukearp/Luke-Function-Demo/master/function-app.json)
