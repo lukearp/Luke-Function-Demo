@@ -55,12 +55,14 @@ var properties = sqlMiPublicEndpoint == true ? {
   serverFarmId: appPlan.id
   siteConfig: {
     appSettings: appSettings
+    linuxFxVersion: 'POWERSHELL|7.2'
   }
 } :{
   enabled: true
   serverFarmId: appPlan.id
   siteConfig: {
     appSettings: appSettings
+    linuxFxVersion: 'POWERSHELL|7.2'
   }
   virtualNetworkSubnetId: subnetIdForVNETIntegration
   vnetRouteAllEnabled: vnetRouteAll
