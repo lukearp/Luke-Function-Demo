@@ -4,8 +4,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.17.1.54307",
-      "templateHash": "11003976351661242625"
+      "version": "0.18.4.5664",
+      "templateHash": "11913398866317550334"
     }
   },
   "parameters": {
@@ -65,7 +65,13 @@
   },
   "variables": {
     "suffix": "[if(equals(parameters('azureEnvironment'), 'AzureCloud'), 'core.windows.net', 'core.usgovcloudapi.net')]",
-    "sku": "[if(equals(parameters('sqlMiPublicEndpoint'), true()), createObject('name', 'Y1', 'tier', 'Dynamic', 'size', 'Y1', 'family', 'Y', 'capacity', 0), createObject('name', 'B1', 'tier', 'Basic', 'size', 'B1', 'family', 'B', 'capacity', 1))]"
+    "sku": {
+      "name": "B1",
+      "tier": "Basic",
+      "size": "B1",
+      "family": "B",
+      "capacity": 1
+    }
   },
   "resources": [
     {
@@ -154,8 +160,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.17.1.54307",
-              "templateHash": "17869703499093599066"
+              "version": "0.18.4.5664",
+              "templateHash": "13372858735257336480"
             }
           },
           "parameters": {
@@ -187,8 +193,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.17.1.54307",
-                      "templateHash": "5335535522475294879"
+                      "version": "0.18.4.5664",
+                      "templateHash": "12129729955123658448"
                     }
                   },
                   "parameters": {
