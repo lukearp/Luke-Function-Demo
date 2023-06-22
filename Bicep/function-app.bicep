@@ -15,8 +15,9 @@ param sqlPassword string
 ])
 param azureEnvironment string = 'AzureCloud'
 param tags object = {}
-param gitRepoUrl string = 'https://github.com/lukearp/Luke-Function-Demo.git'
-param gitBranch string = 'deploy'
+// param gitRepoUrl string = 'https://github.com/lukearp/Luke-Function-Demo.git'
+// param gitBranch string = 'deploy'
+param zipUrl string = 'https://github.com/lukearp/Luke-Function-Demo/releases/download/Current/Release-6.22.2023.zip'
 
 
 var appSettings = [
@@ -132,16 +133,25 @@ resource function 'Microsoft.Web/sites@2022-09-01' = {
   properties: properties
 }
 
-resource sourceControl 'Microsoft.Web/sites/sourcecontrols@2022-09-01' = {
-  name: 'web'
+resource deployment 'Microsoft.Web/sites/extensions@2022-09-01' = {
+  name: 'ZipDeploy'
   parent: function
+  location: location
   properties: {
-    branch: gitBranch
-    repoUrl: gitRepoUrl
-    isGitHubAction: false
-    isManualIntegration: true     
-  }
+    packageUri: zipUrl
+  }    
 }
+
+// resource sourceControl 'Microsoft.Web/sites/sourcecontrols@2022-09-01' = {
+//   name: 'web'
+//   parent: function
+//   properties: {
+//     branch: gitBranch
+//     repoUrl: gitRepoUrl
+//     isGitHubAction: false
+//     isManualIntegration: true     
+//   }
+// }
 
 // resource deployment 'Microsoft.Web/sites/deployments@2022-09-01' = {
 //   name: 'deploy'

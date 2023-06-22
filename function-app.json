@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.18.4.5664",
-      "templateHash": "9481026813501618212"
+      "templateHash": "17102224913189206018"
     }
   },
   "parameters": {
@@ -54,13 +54,9 @@
       "type": "object",
       "defaultValue": {}
     },
-    "gitRepoUrl": {
+    "zipUrl": {
       "type": "string",
-      "defaultValue": "https://github.com/lukearp/Luke-Function-Demo.git"
-    },
-    "gitBranch": {
-      "type": "string",
-      "defaultValue": "deploy"
+      "defaultValue": "https://github.com/lukearp/Luke-Function-Demo/releases/download/Current/Release-6.22.2023.zip"
     }
   },
   "variables": {
@@ -125,14 +121,12 @@
       ]
     },
     {
-      "type": "Microsoft.Web/sites/sourcecontrols",
+      "type": "Microsoft.Web/sites/extensions",
       "apiVersion": "2022-09-01",
-      "name": "[format('{0}/{1}', parameters('functionName'), 'web')]",
+      "name": "[format('{0}/{1}', parameters('functionName'), 'ZipDeploy')]",
+      "location": "[parameters('location')]",
       "properties": {
-        "branch": "[parameters('gitBranch')]",
-        "repoUrl": "[parameters('gitRepoUrl')]",
-        "isGitHubAction": false,
-        "isManualIntegration": true
+        "packageUri": "[parameters('zipUrl')]"
       },
       "dependsOn": [
         "[resourceId('Microsoft.Web/sites', parameters('functionName'))]"
