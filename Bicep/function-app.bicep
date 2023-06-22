@@ -74,13 +74,7 @@ module subnetSetup 'subnetProperties.bicep' = if(sqlMiPublicEndpoint == false){
   } 
 }
 
-var sku = sqlMiPublicEndpoint == true ? {
-  name: 'Y1'
-  tier: 'Dynamic'
-  size: 'Y1'
-  family: 'Y'
-  capacity: 0
-} : {
+var sku = {
   name: 'B1'
   tier: 'Basic'
   size: 'B1'
