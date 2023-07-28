@@ -4,8 +4,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.18.4.5664",
-      "templateHash": "17102224913189206018"
+      "version": "0.19.5.34762",
+      "templateHash": "3906077221553422154"
     }
   },
   "parameters": {
@@ -42,6 +42,9 @@
     "sqlPassword": {
       "type": "securestring"
     },
+    "sqlConnectionString": {
+      "type": "securestring"
+    },
     "azureEnvironment": {
       "type": "string",
       "defaultValue": "AzureCloud",
@@ -54,19 +57,21 @@
       "type": "object",
       "defaultValue": {}
     },
-    "zipUrl": {
+    "gitRepoUrl": {
       "type": "string",
-      "defaultValue": "https://github.com/lukearp/Luke-Function-Demo/releases/download/Current/Release-6.22.2023.zip"
+      "defaultValue": "https://github.com/lukearp/Luke-Function-Demo.git"
+    },
+    "gitBranch": {
+      "type": "string",
+      "defaultValue": "deploy"
     }
   },
   "variables": {
+    "subnetResourceGroup": "[if(equals(parameters('subnetIdForVNETIntegration'), ''), '/0/0/0/0', parameters('subnetIdForVNETIntegration'))]",
     "suffix": "[if(equals(parameters('azureEnvironment'), 'AzureCloud'), 'core.windows.net', 'core.usgovcloudapi.net')]",
     "sku": {
       "name": "B1",
-      "tier": "Basic",
-      "size": "B1",
-      "family": "B",
-      "capacity": 1
+      "tier": "Basic"
     }
   },
   "resources": [
@@ -75,7 +80,7 @@
       "apiVersion": "2022-09-01",
       "name": "[format('{0}-Plan', parameters('functionName'))]",
       "location": "[parameters('location')]",
-      "kind": "[if(equals(parameters('sqlMiPublicEndpoint'), true()), 'functionapp', 'functionapp,linux')]",
+      "kind": "app",
       "sku": "[variables('sku')]",
       "tags": "[parameters('tags')]",
       "properties": {
@@ -83,7 +88,7 @@
         "elasticScaleEnabled": false,
         "maximumElasticWorkerCount": 1,
         "isSpot": false,
-        "reserved": true,
+        "reserved": false,
         "isXenon": false,
         "hyperV": false,
         "targetWorkerCount": 0,
@@ -113,20 +118,22 @@
         "type": "SystemAssigned"
       },
       "tags": "[parameters('tags')]",
-      "properties": "[if(equals(parameters('sqlMiPublicEndpoint'), true()), createObject('enabled', true(), 'serverFarmId', resourceId('Microsoft.Web/serverfarms', format('{0}-Plan', parameters('functionName'))), 'siteConfig', createObject('appSettings', createArray(createObject('name', 'FUNCTIONS_EXTENSION_VERSION', 'value', '~4'), createObject('name', 'FUNCTIONS_WORKER_RUNTIME', 'value', 'powershell'), createObject('name', 'AzureWebJobsStorage', 'value', format('DefaultEndpointsProtocol=https;AccountName={0};AccountKey={1};EndpointSuffix={2}', parameters('stroageAccountName'), listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('stroageAccountName')), '2022-09-01').keys[0].value, variables('suffix'))), createObject('name', 'RESOURCE_GROUP', 'value', parameters('managedInstanceResourceGroup')), createObject('name', 'MANAGED_INSTANCE_NAME', 'value', parameters('managedInstanceName')), createObject('name', 'SQL_USER_NAME', 'value', parameters('sqlUserName')), createObject('name', 'SQL_USER_PASSWORD', 'value', parameters('sqlPassword'))), 'linuxFxVersion', 'POWERSHELL|7.2')), createObject('enabled', true(), 'serverFarmId', resourceId('Microsoft.Web/serverfarms', format('{0}-Plan', parameters('functionName'))), 'siteConfig', createObject('appSettings', createArray(createObject('name', 'FUNCTIONS_EXTENSION_VERSION', 'value', '~4'), createObject('name', 'FUNCTIONS_WORKER_RUNTIME', 'value', 'powershell'), createObject('name', 'AzureWebJobsStorage', 'value', format('DefaultEndpointsProtocol=https;AccountName={0};AccountKey={1};EndpointSuffix={2}', parameters('stroageAccountName'), listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('stroageAccountName')), '2022-09-01').keys[0].value, variables('suffix'))), createObject('name', 'RESOURCE_GROUP', 'value', parameters('managedInstanceResourceGroup')), createObject('name', 'MANAGED_INSTANCE_NAME', 'value', parameters('managedInstanceName')), createObject('name', 'SQL_USER_NAME', 'value', parameters('sqlUserName')), createObject('name', 'SQL_USER_PASSWORD', 'value', parameters('sqlPassword'))), 'linuxFxVersion', 'POWERSHELL|7.2'), 'virtualNetworkSubnetId', parameters('subnetIdForVNETIntegration'), 'vnetRouteAllEnabled', parameters('vnetRouteAll')))]",
+      "properties": "[if(equals(parameters('sqlMiPublicEndpoint'), true()), createObject('enabled', true(), 'serverFarmId', resourceId('Microsoft.Web/serverfarms', format('{0}-Plan', parameters('functionName'))), 'siteConfig', createObject('appSettings', createArray(createObject('name', 'FUNCTIONS_EXTENSION_VERSION', 'value', '~4'), createObject('name', 'FUNCTIONS_WORKER_RUNTIME', 'value', 'powershell'), createObject('name', 'AzureWebJobsStorage', 'value', format('DefaultEndpointsProtocol=https;AccountName={0};AccountKey={1};EndpointSuffix={2}', parameters('stroageAccountName'), listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('stroageAccountName')), '2022-09-01').keys[0].value, variables('suffix'))), createObject('name', 'RESOURCE_GROUP', 'value', parameters('managedInstanceResourceGroup')), createObject('name', 'MANAGED_INSTANCE_NAME', 'value', parameters('managedInstanceName')), createObject('name', 'SQL_USER_NAME', 'value', parameters('sqlUserName')), createObject('name', 'SQL_USER_PASSWORD', 'value', parameters('sqlPassword')), createObject('name', 'SQL_CONNECTION_STRING', 'value', parameters('sqlConnectionString'))), 'netFrameworkVersion', 'v6.0', 'powerShellVersion', '7.2', 'alwaysOn', true(), 'cors', createObject('allowedOrigins', createArray('https://portal.azure.com')))), createObject('enabled', true(), 'serverFarmId', resourceId('Microsoft.Web/serverfarms', format('{0}-Plan', parameters('functionName'))), 'siteConfig', createObject('appSettings', createArray(createObject('name', 'FUNCTIONS_EXTENSION_VERSION', 'value', '~4'), createObject('name', 'FUNCTIONS_WORKER_RUNTIME', 'value', 'powershell'), createObject('name', 'AzureWebJobsStorage', 'value', format('DefaultEndpointsProtocol=https;AccountName={0};AccountKey={1};EndpointSuffix={2}', parameters('stroageAccountName'), listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('stroageAccountName')), '2022-09-01').keys[0].value, variables('suffix'))), createObject('name', 'RESOURCE_GROUP', 'value', parameters('managedInstanceResourceGroup')), createObject('name', 'MANAGED_INSTANCE_NAME', 'value', parameters('managedInstanceName')), createObject('name', 'SQL_USER_NAME', 'value', parameters('sqlUserName')), createObject('name', 'SQL_USER_PASSWORD', 'value', parameters('sqlPassword')), createObject('name', 'SQL_CONNECTION_STRING', 'value', parameters('sqlConnectionString'))), 'netFrameworkVersion', 'v6.0', 'powerShellVersion', '7.2', 'alwaysOn', true(), 'cors', createObject('allowedOrigins', createArray('https://portal.azure.com'))), 'virtualNetworkSubnetId', parameters('subnetIdForVNETIntegration'), 'vnetRouteAllEnabled', parameters('vnetRouteAll')))]",
       "dependsOn": [
         "[resourceId('Microsoft.Web/serverfarms', format('{0}-Plan', parameters('functionName')))]",
         "[resourceId('Microsoft.Storage/storageAccounts', parameters('stroageAccountName'))]",
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, split(parameters('subnetIdForVNETIntegration'), '/')[4]), 'Microsoft.Resources/deployments', format('{0}-Subnet-Delegation', parameters('functionName')))]"
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, split(variables('subnetResourceGroup'), '/')[4]), 'Microsoft.Resources/deployments', format('{0}-Subnet-Delegation', parameters('functionName')))]"
       ]
     },
     {
-      "type": "Microsoft.Web/sites/extensions",
+      "type": "Microsoft.Web/sites/sourcecontrols",
       "apiVersion": "2022-09-01",
-      "name": "[format('{0}/{1}', parameters('functionName'), 'ZipDeploy')]",
-      "location": "[parameters('location')]",
+      "name": "[format('{0}/{1}', parameters('functionName'), 'web')]",
       "properties": {
-        "packageUri": "[parameters('zipUrl')]"
+        "branch": "[parameters('gitBranch')]",
+        "repoUrl": "[parameters('gitRepoUrl')]",
+        "isGitHubAction": false,
+        "isManualIntegration": true
       },
       "dependsOn": [
         "[resourceId('Microsoft.Web/sites', parameters('functionName'))]"
@@ -137,7 +144,7 @@
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2022-09-01",
       "name": "[format('{0}-Subnet-Delegation', parameters('functionName'))]",
-      "resourceGroup": "[split(parameters('subnetIdForVNETIntegration'), '/')[4]]",
+      "resourceGroup": "[split(variables('subnetResourceGroup'), '/')[4]]",
       "properties": {
         "expressionEvaluationOptions": {
           "scope": "inner"
@@ -154,8 +161,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.18.4.5664",
-              "templateHash": "13372858735257336480"
+              "version": "0.19.5.34762",
+              "templateHash": "813926873692194781"
             }
           },
           "parameters": {
@@ -187,8 +194,8 @@
                   "metadata": {
                     "_generator": {
                       "name": "bicep",
-                      "version": "0.18.4.5664",
-                      "templateHash": "12129729955123658448"
+                      "version": "0.19.5.34762",
+                      "templateHash": "1280605346230470647"
                     }
                   },
                   "parameters": {

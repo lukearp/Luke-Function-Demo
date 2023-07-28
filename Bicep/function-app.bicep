@@ -9,16 +9,17 @@ param managedInstanceResourceGroup string
 param sqlUserName string
 @secure()
 param sqlPassword string
+@secure()
+param sqlConnectionString string
 @allowed([
   'AzureCloud'
   'AzureUSGovernment'
 ])
 param azureEnvironment string = 'AzureCloud'
 param tags object = {}
-// param gitRepoUrl string = 'https://github.com/lukearp/Luke-Function-Demo.git'
-// param gitBranch string = 'deploy'
-param zipUrl string = 'https://github.com/lukearp/Luke-Function-Demo/releases/download/Current/Release-6.22.2023.zip'
-
+param gitRepoUrl string = 'https://github.com/lukearp/Luke-Function-Demo.git'
+param gitBranch string = 'deploy'
+//param zipUrl string = 'https://github.com/lukearp/Luke-Function-Demo/releases/download/Current/Release-6.22.2023.zip'
 
 var appSettings = [
   {
@@ -49,46 +50,62 @@ var appSettings = [
     name: 'SQL_USER_PASSWORD'
     value: sqlPassword
   }
+  {
+    name: 'SQL_CONNECTION_STRING'
+    value: sqlConnectionString
+  }
 ]
+var subnetResourceGroup = subnetIdForVNETIntegration == '' ? '/0/0/0/0' : subnetIdForVNETIntegration
 var suffix = azureEnvironment == 'AzureCloud' ? 'core.windows.net' : 'core.usgovcloudapi.net'
 var properties = sqlMiPublicEndpoint == true ? {
   enabled: true
   serverFarmId: appPlan.id
   siteConfig: {
     appSettings: appSettings
-    linuxFxVersion: 'POWERSHELL|7.2'
+    netFrameworkVersion: 'v6.0'
+    powerShellVersion: '7.2'
+    alwaysOn: true
+    cors: {
+      allowedOrigins: [
+        'https://portal.azure.com'
+      ] 
+    }
   }
-} :{
+} : {
   enabled: true
   serverFarmId: appPlan.id
   siteConfig: {
     appSettings: appSettings
-    linuxFxVersion: 'POWERSHELL|7.2'
+    netFrameworkVersion: 'v6.0'
+    powerShellVersion: '7.2'
+    alwaysOn: true
+    cors: {
+      allowedOrigins: [
+        'https://portal.azure.com'
+      ] 
+    }
   }
   virtualNetworkSubnetId: subnetIdForVNETIntegration
   vnetRouteAllEnabled: vnetRouteAll
 }
 
-module subnetSetup 'subnetProperties.bicep' = if(sqlMiPublicEndpoint == false){
+module subnetSetup 'subnetProperties.bicep' = if (sqlMiPublicEndpoint == false) {
   name: '${functionName}-Subnet-Delegation'
-  scope:resourceGroup(split(subnetIdForVNETIntegration,'/')[4])
+  scope: resourceGroup(split(subnetResourceGroup, '/')[4])
   params: {
     subnetId: subnetIdForVNETIntegration
-  } 
+  }
 }
 
 var sku = {
   name: 'B1'
   tier: 'Basic'
-  size: 'B1'
-  family: 'B'
-  capacity: 1
 }
 
 resource appPlan 'Microsoft.Web/serverfarms@2022-09-01' = {
   location: location
   name: '${functionName}-Plan'
-  kind: sqlMiPublicEndpoint == true ? 'functionapp' : 'functionapp,linux'
+  kind: 'app'
   sku: sku
   tags: tags
   properties: {
@@ -96,13 +113,12 @@ resource appPlan 'Microsoft.Web/serverfarms@2022-09-01' = {
     elasticScaleEnabled: false
     maximumElasticWorkerCount: 1
     isSpot: false
-    reserved: true
+    reserved: false
     isXenon: false
     hyperV: false
     targetWorkerCount: 0
     targetWorkerSizeId: 0
     zoneRedundant: false
-    
   }
 }
 
@@ -114,9 +130,7 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2022-09-01' = {
     name: 'Standard_LRS'
   }
   tags: tags
-  properties: {
-
-  }
+  properties: {}
 }
 
 resource function 'Microsoft.Web/sites@2022-09-01' = {
@@ -133,30 +147,13 @@ resource function 'Microsoft.Web/sites@2022-09-01' = {
   properties: properties
 }
 
-resource deployment 'Microsoft.Web/sites/extensions@2022-09-01' = {
-  name: 'ZipDeploy'
+resource sourceControl 'Microsoft.Web/sites/sourcecontrols@2022-09-01' = {
+  name: 'web'
   parent: function
-  location: location
   properties: {
-    packageUri: zipUrl
-  }    
+    branch: gitBranch
+    repoUrl: gitRepoUrl
+    isGitHubAction: false
+    isManualIntegration: true
+  }
 }
-
-// resource sourceControl 'Microsoft.Web/sites/sourcecontrols@2022-09-01' = {
-//   name: 'web'
-//   parent: function
-//   properties: {
-//     branch: gitBranch
-//     repoUrl: gitRepoUrl
-//     isGitHubAction: false
-//     isManualIntegration: true     
-//   }
-// }
-
-// resource deployment 'Microsoft.Web/sites/deployments@2022-09-01' = {
-//   name: 'deploy'
-//   parent: function
-//   properties: {
-//     details: '' 
-//   }  
-// }
