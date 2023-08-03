@@ -11,7 +11,7 @@ resource subnet 'Microsoft.Network/virtualNetworks/subnets@2022-07-01' existing 
 }
 
 module subnetSetup 'subnetSetup.bicep' = {
-  name: '${subnet.name}-Subnet-Setup'
+  name: '${replace(subnet.name,'-','')}-Deploy'
   params: {
     subnetId: subnet.id
     properties: subnet.properties
