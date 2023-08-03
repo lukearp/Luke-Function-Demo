@@ -1,7 +1,9 @@
 param functionName string
 param location string
 param sqlMiPublicEndpoint bool = true
-param subnetIdForVNETIntegration string = ''
+param subnetName string = ''
+param vnetName string = ''
+param vnetResourceGroup string = ''
 param vnetRouteAll bool = false
 param stroageAccountName string
 param managedInstanceName string
@@ -55,7 +57,6 @@ var appSettings = [
     value: sqlConnectionString
   }
 ]
-var subnetResourceGroup = subnetIdForVNETIntegration == '' ? '/0/0/0/0' : subnetIdForVNETIntegration
 var suffix = azureEnvironment == 'AzureCloud' ? 'core.windows.net' : 'core.usgovcloudapi.net'
 var properties = sqlMiPublicEndpoint == true ? {
   enabled: true
@@ -85,15 +86,16 @@ var properties = sqlMiPublicEndpoint == true ? {
       ] 
     }
   }
-  virtualNetworkSubnetId: subnetIdForVNETIntegration
+  virtualNetworkSubnetId: '${subscription().id}/resourceGroups/${vnetResourceGroup}/providers/Microsoft.Network/virtualNetworks/${vnetName}/subnets/${subnetName}'
   vnetRouteAllEnabled: vnetRouteAll
 }
 
 module subnetSetup 'subnetProperties.bicep' = if (sqlMiPublicEndpoint == false) {
   name: '${functionName}-Subnet-Delegation'
-  scope: resourceGroup(split(subnetResourceGroup, '/')[4])
+  scope: resourceGroup(vnetResourceGroup)
   params: {
-    subnetId: subnetIdForVNETIntegration
+    subnetName: subnetName
+    vnetName: vnetName  
   }
 }
 

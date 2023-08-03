@@ -1,16 +1,17 @@
-param subnetId string
+param subnetName string
+param vnetName string
 
 resource vnet 'Microsoft.Network/virtualNetworks@2022-07-01' existing = {
-  name: split(subnetId,'/')[8] 
+  name: vnetName
 }
 
 resource subnet 'Microsoft.Network/virtualNetworks/subnets@2022-07-01' existing = {
-  name: split(subnetId,'/')[10]
+  name: subnetName
   parent: vnet  
 }
 
 module subnetSetup 'subnetSetup.bicep' = {
-  name: '${split(subnetId,'/')[10]}-Subnet-Setup'
+  name: '${subnet.name}-Subnet-Setup'
   params: {
     subnetId: subnet.id
     properties: subnet.properties

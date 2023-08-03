@@ -1,12 +1,14 @@
-var functionName = 'luketest-sqlcost-7-deploy'
+var functionName = 'luketest-sqlcost-8-deploy'
 module function 'function-app.bicep' = {
   name: '${functionName}-Function-Deploy'
   params: {
     functionName: functionName
     location: 'eastus'
-    sqlMiPublicEndpoint: true
+    sqlMiPublicEndpoint: false
     stroageAccountName: 'lukesqlmicostfunction'
-    //subnetIdForVNETIntegration: '/subscriptions/32eb88b4-4029-4094-85e3-ec8b7ce1fc00/resourceGroups/vwan/providers/Microsoft.Network/virtualNetworks/route-vnet/subnets/default'    
+    subnetName: 'test'    
+    vnetName: 'core-transit-eastus-vnet'
+    vnetResourceGroup: 'core-transit-networking-eastus-rg'
     managedInstanceName: 'luke'
     managedInstanceResourceGroup: 'luke-rg'
     sqlPassword: 'Windows2P@ss'
