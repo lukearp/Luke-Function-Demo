@@ -90,12 +90,12 @@ var properties = sqlMiPublicEndpoint == true ? {
   vnetRouteAllEnabled: vnetRouteAll
 }
 
-module subnetSetup 'subnetProperties.bicep' = if (sqlMiPublicEndpoint == false) {
+module subnetSetup 'subnetProperties.bicep' = if(sqlMiPublicEndpoint == false) {
   name: '${functionName}-Subnet-Delegation'
-  scope: resourceGroup(vnetResourceGroup)
   params: {
     subnetName: subnetName
-    vnetName: vnetName  
+    vnetName: vnetName 
+    vnetResourceGroup: vnetResourceGroup
   }
 }
 

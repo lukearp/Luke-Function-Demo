@@ -1,21 +1,21 @@
 param subnetName string
 param vnetName string
+param vnetResourceGroup string
 
-resource vnet 'Microsoft.Network/virtualNetworks@2022-07-01' existing = {
-  name: vnetName
-}
-
-resource subnet 'Microsoft.Network/virtualNetworks/subnets@2022-07-01' existing = {
-  name: subnetName
-  parent: vnet  
+module subnetInfo 'subnetinfo.bicep' = {
+  name: '${replace(subnetName,'-','')}-Info-Deploy'
+  scope: resourceGroup(vnetResourceGroup)
+  params: {
+    subnetName: subnetName
+    vnetName: vnetName  
+  }
 }
 
 module subnetSetup 'subnetSetup.bicep' = {
-  name: '${replace(subnet.name,'-','')}-Deploy'
+  name: '${replace(subnetName,'-','')}-Deploy'
+  scope: resourceGroup(vnetResourceGroup)
   params: {
-    subnetId: subnet.id
-    properties: subnet.properties
+    subnetId: subnetInfo.outputs.subnet.id
+    properties: subnetInfo.outputs.subnet.properties
   }   
 }
-
-output properties object = subnet.properties
